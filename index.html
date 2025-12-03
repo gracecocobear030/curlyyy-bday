@@ -111,14 +111,21 @@
     <!-- Main Content Area -->
     <main class="pt-24 pb-8 flex flex-col items-center justify-center">
         
-        <!-- Image Placeholder, now pointing to local files -->
+        <!-- Image/Video Container -->
         <div class="bg-white p-2 rounded-xl shadow-lg border-4 border-pink-300 max-w-full">
-            <img id="main-art" 
+            
+            <!-- Art 1: Image (Visible by default) -->
+            <img id="main-art-img" 
                  src="1.png" 
                  alt="Main Birthday Art" 
-                 class="rounded-lg max-w-full h-auto transition-opacity duration-500"
-                 data-art1="1.png"
-                 data-art2="2.gif">
+                 class="rounded-lg max-w-full h-auto transition-opacity duration-500">
+            
+            <!-- Art 2: Video (Hidden by default) -->
+            <video id="main-art-video" 
+                   src="2.mp4" 
+                   autoplay loop muted
+                   alt="Surprise Birthday Video" 
+                   class="rounded-lg max-w-full h-auto transition-opacity duration-500 hidden"></video>
         </div>
 
         <!-- Main Birthday Message -->
@@ -128,7 +135,7 @@
 
         <!-- Interactive Buttons Row -->
         <div class="flex flex-wrap justify-center gap-4 p-4 bg-white/90 rounded-2xl shadow-xl max-w-xl w-full">
-            <!-- Button 1: Toggle Image -->
+            <!-- Button 1: Toggle Image/Video -->
             <button id="btn-toggle-art" data-type="toggle-art" class="action-btn p-5 text-3xl bg-blue-400 hover:bg-blue-500 rounded-full shadow-lg transition-transform hover:scale-110">
                 ❓
             </button>
@@ -160,7 +167,7 @@
     let isPlaying = false;
     let isArt1 = true;
     const musicToggleBtn = document.getElementById('music-toggle-btn');
-    const mainArt = document.getElementById('main-art');
+    // REMOVED mainArt variable as we now use two separate elements
     const musicToast = document.getElementById('music-toast');
     const modal = document.getElementById('message-modal');
     const modalTitle = document.getElementById('modal-title');
@@ -230,22 +237,27 @@
         }, 300); // Match CSS transition duration
     }
 
-    // --- Image Toggle Function (No Change in logic, only paths updated in HTML) ---
+    // --- Image/Video Toggle Function (UPDATED) ---
 
     function toggleArt() {
-        isArt1 = !isArt1;
-        const newSrc = isArt1 ? mainArt.dataset.art1 : mainArt.dataset.art2;
+        const img = document.getElementById('main-art-img');
+        const video = document.getElementById('main-art-video');
         
-        // Add a class for fade-out
-        mainArt.classList.add('opacity-0');
-
-        setTimeout(() => {
-            // Change source during fade-out
-            mainArt.src = newSrc;
-            
-            // Remove fade-out class to trigger fade-in
-            mainArt.classList.remove('opacity-0');
-        }, 300); // Half of the CSS transition duration
+        if (isArt1) {
+            // Switch from Image (1.png) to Video (2.mp4)
+            img.classList.add('hidden');
+            video.classList.remove('hidden');
+            // Play the video and reset to start
+            video.currentTime = 0; 
+            video.play();
+            isArt1 = false;
+        } else {
+            // Switch from Video (2.mp4) back to Image (1.png)
+            video.pause();
+            video.classList.add('hidden');
+            img.classList.remove('hidden');
+            isArt1 = true;
+        }
     }
     
     // --- Confetti Functions (No Change) ---
