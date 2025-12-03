@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, Curlyyy!</title>
+    <!-- Load Tailwind CSS (Using CDN is acceptable for local files if you have internet access once, or you can download the CSS file if truly 100% offline is needed, but for simplicity we keep the CDN as the structure requires it to render correctly in this environment) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- LOAD GOOGLE HANDWRITING FONT: Caveat (Highly legible and personalized) -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS for the celebratory look and feel -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fce7f3; /* Light Pink Background */
+            overflow-x: hidden; /* Prevent horizontal scroll from decorations */
+        }
+        .birthday-decoration {
+            position: absolute;
+            z-index: 10;
+            pointer-events: none; /* Ignore clicks on decorations */
+        }
+        /* Custom Confetti Animation */
+        /* ... (Confetti CSS remains the same) ... */
+        
+        /* Floating music button animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.05); }
+        }
+        .floating-btn {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        /* Modal Backdrop */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 50;
+        }
+
+        /* Responsive Canvas for Confetti */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 60; /* INCREASED Z-INDEX to ensure confetti shows above the modal backdrop (z-50) */
+        }
+
+        /* Custom Handwritng Font for Modal Content (Updated to Caveat) */
+        #message-modal #modal-content {
+            font-family: 'Caveat', cursive; /* Changed font to Caveat */
+            font-size: 1.75rem; /* Increased size slightly for better readability */
+            line-height: 2.75rem; /* Increased line height */
+            text-align: center;
+            padding: 1rem 0;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="min-h-screen relative p-4 sm:p-8">
+
+    <!-- Confetti Canvas (Hidden by default) -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Ribbons and Balloons Overlay (Decorations) -->
+    <div class="birthday-decoration top-0 left-0 w-full h-24 overflow-hidden">
+        <div class="absolute w-full h-full bg-pink-400 opacity-60"></div>
+        <!-- Emojis as decorations -->
+        <span class="text-3xl absolute top-0 left-4 rotate-12">🎈</span>
+        <span class="text-4xl absolute top-4 left-1/4 -rotate-6">🎀</span>
+        <span class="text-2xl absolute top-8 right-1/4 rotate-3">🎉</span>
+        <span class="text-5xl absolute top-0 right-4 -rotate-12">🎁</span>
+    </div>
+
+    <!-- Music Control Button (Floating on the left) -->
+    <button id="music-toggle-btn" 
+            class="floating-btn fixed top-1/2 -translate-y-1/2 left-4 z-30 p-4 bg-yellow-400 text-gray-800 rounded-full shadow-2xl hover:bg-yellow-300 transition-colors focus:outline-none focus:ring-4 focus:ring-yellow-500/50">
+        <span id="music-icon-placeholder">
+            <!-- Initial state: Volume On SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2V15H6L11 19V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </span>
+    </button>
+    
+    <!-- Toast Message for Music -->
+    <div id="music-toast" class="fixed top-1/4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-xl opacity-0 transition-opacity duration-300 z-50 pointer-events-none">
+        Press this to mute/play
+    </div>
+
+    <!-- Audio Element for Music - Points to your local file -->
+    <audio id="birthday-song" loop>
+        <source src="happy birthday song.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Modal for messages (hidden by default) -->
+    <div id="message-modal" class="fixed inset-0 hidden items-center justify-center modal-backdrop transition-opacity duration-300">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-lg w-11/12 border-4 border-pink-500 relative transform scale-100 transition-transform duration-300">
+            <h3 id="modal-title" class="text-2xl font-bold text-pink-600 mb-4 text-center"></h3>
+            <p id="modal-content" class="text-gray-700 whitespace-pre-line"></p>
+            <button onclick="hideModal()" class="mt-6 w-full py-2 bg-pink-500 text-white font-semibold rounded-lg hover:bg-pink-600 transition-colors">Close</button>
+        </div>
+    </div>
+
+
+    <!-- Main Content Area -->
+    <main class="pt-24 pb-8 flex flex-col items-center justify-center">
+        
+        <!-- Image Placeholder, now pointing to local files -->
+        <div class="bg-white p-2 rounded-xl shadow-lg border-4 border-pink-300 max-w-full">
+            <img id="main-art" 
+                 src="1.png" 
+                 alt="Main Birthday Art" 
+                 class="rounded-lg max-w-full h-auto transition-opacity duration-500"
+                 data-art1="1.png"
+                 data-art2="2.gif">
+        </div>
+
+        <!-- Main Birthday Message -->
+        <h1 class="text-5xl sm:text-7xl font-extrabold text-pink-600 my-8 text-center bg-white/70 p-3 rounded-xl shadow-md">
+            Happy Birthday, Curlyyy!!!
+        </h1>
+
+        <!-- Interactive Buttons Row -->
+        <div class="flex flex-wrap justify-center gap-4 p-4 bg-white/90 rounded-2xl shadow-xl max-w-xl w-full">
+            <!-- Button 1: Toggle Image -->
+            <button id="btn-toggle-art" data-type="toggle-art" class="action-btn p-5 text-3xl bg-blue-400 hover:bg-blue-500 rounded-full shadow-lg transition-transform hover:scale-110">
+                ❓
+            </button>
+            
+            <!-- Button 2: Confetti -->
+            <button id="btn-confetti" data-type="confetti" class="action-btn p-5 text-3xl bg-green-400 hover:bg-green-500 rounded-full shadow-lg transition-transform hover:scale-110">
+                ❗
+            </button>
+            
+            <!-- Button 3: Love Message (Content updated) -->
+            <button id="btn-love" data-type="message" data-title="A Birthday Wish" data-content="Happy birthday, my overthinking, sweet boy. I love you and so does your whole family! I wish you all the best. I wish you good health, good wealth, good fortune and good deeds. You are the kindest person I know, and I love every part of you, both the silly and the good. Look forward to your bolu meranti and big hug from me when you get to Medan :)" class="action-btn p-5 text-3xl bg-red-500 hover:bg-red-600 rounded-full shadow-lg transition-transform hover:scale-110">
+                ❤️
+            </button>
+            
+            <!-- Button 4: Silly Message (Content updated) -->
+            <button id="btn-silly" data-type="message" data-title="Teehee!" data-content="Teehee, cuwwy dum dum :p" class="action-btn p-5 text-3xl bg-yellow-400 hover:bg-yellow-500 rounded-full shadow-lg transition-transform hover:scale-110">
+                ☀️
+            </button>
+            
+            <!-- Button 5: Secret Code (Content updated and corrected to JUMP STICK) -->
+            <button id="btn-code" data-type="message" data-title="Secret Gift Claim" data-content="JUMP STICK SAVINGS CODE HEHE, Claim the gift by sending the code 'MADAMILYHEHE' to my whatsapp hihihi" class="action-btn p-5 text-3xl bg-purple-400 hover:bg-purple-500 rounded-full shadow-lg transition-transform hover:scale-110">
+                🌙
+            </button>
+        </div>
+    </main>
+
+<script>
+    // --- Global State and Initialization ---
+    let isPlaying = false;
+    let isArt1 = true;
+    const musicToggleBtn = document.getElementById('music-toggle-btn');
+    const mainArt = document.getElementById('main-art');
+    const musicToast = document.getElementById('music-toast');
+    const modal = document.getElementById('message-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalContent = document.getElementById('modal-content');
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const ctx = confettiCanvas.getContext('2d');
+    
+    // HTML Audio Element
+    const birthdaySong = document.getElementById('birthday-song');
+
+    // SVG Icons for Volume State
+    const ICON_VOLUME_ON = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2V15H6L11 19V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+    // Volume off icon with a line through it
+    const ICON_VOLUME_OFF = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2V15H6L11 19V5Z"/><line x1="17" y1="9" x2="22" y2="15"/><line x1="17" y1="15" x2="22" y2="9"/></svg>';
+    
+    // --- Music Functions using HTML Audio ---
+
+    function toggleMusic() {
+        if (isPlaying) {
+            birthdaySong.pause();
+            isPlaying = false;
+            updateMusicButton(false);
+        } else {
+            // Play promise must be handled to avoid errors if playback is blocked
+            birthdaySong.play().then(() => {
+                isPlaying = true;
+                updateMusicButton(true);
+            }).catch(error => {
+                console.error("Audio playback failed (user must interact first):", error);
+                // Even if it fails, update state to attempt again on next click
+                isPlaying = false; 
+                updateMusicButton(false);
+            });
+        }
+    }
+
+    function updateMusicButton(playing) {
+        const iconContainer = document.getElementById('music-icon-placeholder');
+        iconContainer.innerHTML = playing ? ICON_VOLUME_ON : ICON_VOLUME_OFF;
+    }
+
+    function showToast() {
+        musicToast.classList.remove('opacity-0');
+        musicToast.classList.add('opacity-100');
+        setTimeout(() => {
+            musicToast.classList.remove('opacity-100');
+            musicToast.classList.add('opacity-0');
+        }, 3000);
+    }
+    
+    // --- Modal Functions (No Change) ---
+
+    function showModal(title, content) {
+        modalTitle.textContent = title;
+        modalContent.textContent = content;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex', 'opacity-0');
+        // Force reflow and transition
+        setTimeout(() => modal.classList.remove('opacity-0'), 10);
+    }
+
+    function hideModal() {
+        modal.classList.add('opacity-0');
+        setTimeout(() => {
+            modal.classList.remove('flex', 'opacity-0');
+            modal.classList.add('hidden');
+        }, 300); // Match CSS transition duration
+    }
+
+    // --- Image Toggle Function (No Change in logic, only paths updated in HTML) ---
+
+    function toggleArt() {
+        isArt1 = !isArt1;
+        const newSrc = isArt1 ? mainArt.dataset.art1 : mainArt.dataset.art2;
+        
+        // Add a class for fade-out
+        mainArt.classList.add('opacity-0');
+
+        setTimeout(() => {
+            // Change source during fade-out
+            mainArt.src = newSrc;
+            
+            // Remove fade-out class to trigger fade-in
+            mainArt.classList.remove('opacity-0');
+        }, 300); // Half of the CSS transition duration
+    }
+    
+    // --- Confetti Functions (No Change) ---
+    
+    let particles = [];
+    const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f'];
+    let animationFrame = null;
+    let confettiDuration = 3000; // 3 seconds
+
+    function resizeCanvas() {
+        confettiCanvas.width = window.innerWidth;
+        confettiCanvas.height = window.innerHeight;
+    }
+
+    class ConfettiPiece {
+        constructor() {
+            this.x = Math.random() * confettiCanvas.width;
+            this.y = -10; // Start slightly above the screen
+            this.speed = Math.random() * 3 + 2;
+            this.rotation = Math.random() * 360;
+            this.rotationSpeed = Math.random() * 10 - 5;
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+            this.width = Math.random() * 8 + 4;
+            this.height = Math.random() * 15 + 8;
+        }
+
+        update() {
+            this.y += this.speed;
+            this.rotation += this.rotationSpeed;
+        }
+
+        draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.rotation * Math.PI / 180);
+            ctx.fillStyle = this.color;
+            ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+            ctx.restore();
+        }
+    }
+
+    function launchConfetti() {
+        if (animationFrame) {
+            cancelAnimationFrame(animationFrame); // Stop previous if running
+            particles = [];
+        }
+        
+        // Spawn a lot of particles
+        for (let i = 0; i < 150; i++) {
+            particles.push(new ConfettiPiece());
+        }
+        
+        confettiCanvas.style.display = 'block'; // Show canvas
+        
+        // Start the loop
+        const startTime = Date.now();
+        function animateConfetti() {
+            if (Date.now() - startTime > confettiDuration) {
+                confettiCanvas.style.display = 'none'; // Hide when done
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+                return;
+            }
+
+            ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+                
+                // Remove particles that have fallen off screen
+                if (particles[i].y > confettiCanvas.height) {
+                    particles.splice(i, 1);
+                }
+            }
+            
+            // Spawn new particles slowly during the duration
+            if (Date.now() - startTime < confettiDuration - 500 && Math.random() < 0.1) {
+                particles.push(new ConfettiPiece());
+            }
+
+            animationFrame = requestAnimationFrame(animateConfetti);
+        }
+
+        animateConfetti();
+    }
+
+
+    // --- Event Listeners and Setup ---
+
+    // Initial icon setup
+    updateMusicButton(false);
+    
+    // Resize confetti canvas on window resize
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas(); // Initial call
+
+    // Show initial toast message
+    musicToggleBtn.addEventListener('click', () => {
+        toggleMusic();
+        showToast();
+    });
+
+    // Delegated event listener for the 5 interactive buttons
+    document.querySelectorAll('.action-btn').forEach(button => {
+        button.addEventListener('click', (event) => {
+            const type = event.currentTarget.dataset.type;
+            
+            switch (type) {
+                case 'toggle-art':
+                    toggleArt();
+                    break;
+                case 'confetti':
+                    launchConfetti();
+                    break;
+                case 'message':
+                    const title = event.currentTarget.dataset.title;
+                    const content = event.currentTarget.dataset.content;
+                    showModal(title, content);
+                    break;
+            }
+        });
+    });
+
+    // Close modal when clicking outside (on the backdrop)
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            hideModal();
+        }
+    });
+
+</script>
+</body>
+</html>
